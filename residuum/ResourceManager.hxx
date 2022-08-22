@@ -29,7 +29,7 @@ namespace res {
 			if(auto obj = find(key)) {
 				return *obj;
 			}
-			throw std::runtime_error("Cannot find object: \"" + std::string(key) + "\"");
+			throw std::runtime_error("Cannot find object: \"" + std::string(*key) + "\"");
 		}
 
 		// Returns pointer to resource or nullptr if not found

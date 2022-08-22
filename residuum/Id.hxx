@@ -32,12 +32,6 @@ namespace res {
 
 
 
-		operator const std::string_view &() const {
-			return this->str;
-		}
-
-
-
 		const std::string_view operator*() const {
 			return this->str;
 		}
