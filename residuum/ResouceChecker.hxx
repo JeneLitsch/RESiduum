@@ -6,7 +6,7 @@
 namespace res {
 	struct ResourceChecker {
 	public:
-		static void declare(const std::string & name) {
+		static void declare(const std::string_view & name) {
 			std::lock_guard lock{mutex};
 			if(!active) return;
 			declared.insert(name);
@@ -14,7 +14,7 @@ namespace res {
 
 
 
-		static void use(const std::string & name) {
+		static void use(const std::string_view & name) {
 			std::lock_guard lock{mutex};
 			if(!active) return;
 			used.insert(name);
@@ -50,9 +50,9 @@ namespace res {
 
 
 
-		static std::set<std::string> get_unused() {
+		static std::set<std::string_view> get_unused() {
 			std::lock_guard lock{mutex};
-			std::set<std::string> unused;
+			std::set<std::string_view> unused;
 
 			std::set_difference(
 				std::begin(declared), std::end(declared),
@@ -64,9 +64,9 @@ namespace res {
 		}
 
 
-		static std::set<std::string> get_missing() {
+		static std::set<std::string_view> get_missing() {
 			std::lock_guard lock{mutex};
-			std::set<std::string> missing;
+			std::set<std::string_view> missing;
 
 			std::set_difference(
 				std::begin(used), std::end(used),
@@ -79,8 +79,8 @@ namespace res {
 		
 	private:
 		inline static std::mutex mutex;
-		inline static std::set<std::string> declared;
-		inline static std::set<std::string> used;
+		inline static std::set<std::string_view> declared;
+		inline static std::set<std::string_view> used;
 		inline static bool active = true;
 	};
 }

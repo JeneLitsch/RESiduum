@@ -2,12 +2,13 @@
 #include <unordered_map>
 #include <mutex>
 #include <memory>
+#include "residuum/Id.hxx"
+#include "residuum/Key.hxx"
+
 namespace res {
 
 	template<typename ResT>
-	concept resource_type = requires(ResT & r) {
-		r.id;
-	};
+	concept resource_type = std::same_as<decltype(ResT::id), res::Id<ResT>>;
 	
 	// Central interface for accessing shared and preloaded Resources
 	template<resource_type ResourceType>
@@ -17,14 +18,14 @@ namespace res {
 	public:
 
 		// Checks if resource exists
-		static bool contains(const std::string & key) {
+		static bool contains(const res::Key<ResourceType> & key) {
 			const std::scoped_lock<std::mutex> lock(mutex);
 			return look_up_table.contains(key);
 		}
 
 		// Returns Resourec reference 
 		// or throws if the Resouce does not exists in this Storage unit
-		static const ResourceType & get(const std::string & key) {
+		static const ResourceType & get(const res::Key<ResourceType> & key) {
 			if(auto obj = find(key)) {
 				return *obj;
 			}
@@ -32,10 +33,10 @@ namespace res {
 		}
 
 		// Returns pointer to resource or nullptr if not found
-		static const ResourceType * find(const std::string & key) {
+		static const ResourceType * find(const res::Key<ResourceType> & key) {
 			const std::scoped_lock<std::mutex> lock(mutex);
-			if(look_up_table.contains(key)) {
-				return look_up_table.at(key).get();
+			if(look_up_table.contains(key.ptr())) {
+				return look_up_table.at(key.ptr()).get();
 			}
 			else return nullptr;
 		}
@@ -43,7 +44,7 @@ namespace res {
 		// Inserts new Resource
 		static void insert(const ResourceType & resource) {
 			const std::scoped_lock<std::mutex> lock(mutex);
-			look_up_table.insert({resource.id, std::make_unique<ResourceType>(resource)});
+			look_up_table.insert({resource.id.ptr(), std::make_unique<ResourceType>(resource)});
 		}
 
 	private:
@@ -54,7 +55,7 @@ namespace res {
 		Storage & operator =(Storage &&) = delete;
 
 
-		using Table = std::unordered_map<std::string, std::unique_ptr<ResourceType>>;
+		using Table = std::unordered_map<const char *, std::unique_ptr<ResourceType>>;
 		inline static Table look_up_table;
 		inline static std::mutex mutex;
 	};
@@ -67,21 +68,21 @@ namespace res {
 
 	// Returns true if a Resource of given Type and Id is stored
 	template<class ResourceType>
-	bool contains(const std::string & resourceId) {
+	bool contains(const res::Key<ResourceType> & resourceId) {
 		return Storage<ResourceType>::contains(resourceId);
 	}
 
 	// Returns const pointer to Resource of given Type
 	// Returns nullptr if it does not exists   
 	template<class ResourceType>
-	const ResourceType * find(const std::string & resourceId) {
+	const ResourceType * find(const res::Key<ResourceType> & resourceId) {
 		return Storage<ResourceType>::find(resourceId);
 	}
 
 	// Returns const pointer to Resource of given Type
 	// Throws std::runtime_error if it does not exists   
 	template<class ResourceType>
-	const ResourceType & get(const std::string & resourceId) {
+	const ResourceType & get(const res::Key<ResourceType> & resourceId) {
 		return Storage<ResourceType>::get(resourceId);
 	}
 
