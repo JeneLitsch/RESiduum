@@ -47,6 +47,14 @@ namespace res {
 			look_up_table.insert({resource.id.ptr(), std::make_unique<ResourceType>(resource)});
 		}
 
+
+
+		// Inserts new Resource
+		static void insert(ResourceType && resource) {
+			const std::scoped_lock<std::mutex> lock(mutex);
+			look_up_table.insert({resource.id.ptr(), std::make_unique<ResourceType>(std::move(resource))});
+		}
+
 	private:
 		Storage() = delete;
 		Storage(const Storage &) = delete;
@@ -65,6 +73,16 @@ namespace res {
 	void insert(const ResourceType & resource) {
 		Storage<ResourceType>::insert(resource);
 	}
+
+
+
+	// Insert new Resource of specified Type into corresponding Storage<...> 
+	template<class ResourceType>
+	void insert(ResourceType && resource) {
+		Storage<ResourceType>::insert(std::move(resource));
+	}
+
+
 
 	// Returns true if a Resource of given Type and Id is stored
 	template<class ResourceType>
