@@ -1,4 +1,4 @@
 #pragma once
-#include "ResourceManager.hxx"
-#include "Id.hxx"
-#include "Key.hxx"
+#include "detail/ResourceManager.hxx"
+#include "detail/Id.hxx"
+#include "detail/Key.hxx"

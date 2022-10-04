@@ -2,8 +2,8 @@
 #include <unordered_map>
 #include <mutex>
 #include <memory>
-#include "residuum/Id.hxx"
-#include "residuum/Key.hxx"
+#include "Id.hxx"
+#include "Key.hxx"
 
 namespace res {
 
