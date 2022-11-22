@@ -2,6 +2,7 @@
 #include <string>
 #include "ResouceChecker.hxx"
 #include "NameMap.hxx"
+#include "Key.hxx"
 
 namespace res {
 	template<typename ForResource>
@@ -35,6 +36,12 @@ namespace res {
 		const std::string_view operator*() const {
 			return this->str;
 		}
+
+
+		Key<ForResource> key() const {
+			return Key<ForResource>{this->str};
+		}
+
 
 	private:
 		std::string_view str;
