@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <iostream>
 #include <mutex>
 #include <memory>
 #include "Id.hxx"
@@ -19,8 +20,8 @@ namespace res {
 
 		// Checks if resource exists
 		static bool contains(const res::Key<ResourceType> & key) {
-			const std::scoped_lock<std::mutex> lock(mutex);
-			return look_up_table.contains(key);
+			const std::scoped_lock<std::mutex> lock(mutex());
+			return look_up_table().contains(key);
 		}
 
 		// Returns Resourec reference 
@@ -34,25 +35,25 @@ namespace res {
 
 		// Returns pointer to resource or nullptr if not found
 		static const ResourceType * find(const res::Key<ResourceType> & key) {
-			const std::scoped_lock<std::mutex> lock(mutex);
-			if(look_up_table.contains(key.ptr())) {
-				return look_up_table.at(key.ptr()).get();
+			const std::scoped_lock<std::mutex> lock(mutex());
+			if(look_up_table().contains(key.ptr())) {
+				return look_up_table().at(key.ptr()).get();
 			}
 			else return nullptr;
 		}
 
 		// Inserts new Resource
 		static void insert(const ResourceType & resource) {
-			const std::scoped_lock<std::mutex> lock(mutex);
-			look_up_table.insert({resource.id.ptr(), std::make_unique<ResourceType>(resource)});
+			const std::scoped_lock<std::mutex> lock(mutex());
+			look_up_table().insert({resource.id.ptr(), std::make_unique<ResourceType>(resource)});
 		}
 
 
 
 		// Inserts new Resource
 		static void insert(ResourceType && resource) {
-			const std::scoped_lock<std::mutex> lock(mutex);
-			look_up_table.insert({resource.id.ptr(), std::make_unique<ResourceType>(std::move(resource))});
+			const std::scoped_lock<std::mutex> lock(mutex());
+			look_up_table().insert({resource.id.ptr(), std::make_unique<ResourceType>(std::move(resource))});
 		}
 
 	private:
@@ -62,10 +63,17 @@ namespace res {
 		Storage(Storage &&) = delete;
 		Storage & operator =(Storage &&) = delete;
 
-
 		using Table = std::unordered_map<const char *, std::unique_ptr<ResourceType>>;
-		inline static Table look_up_table;
-		inline static std::mutex mutex;
+
+		static std::mutex & mutex() {
+			static std::mutex instance;
+			return instance;
+		}
+
+		static Table & look_up_table() {
+			static Table instance;
+			return instance;
+		}
 	};
 
 	// Insert new Resource of specified Type into corresponding Storage<...> 
