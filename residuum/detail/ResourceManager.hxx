@@ -20,8 +20,7 @@ namespace res {
 
 		// Checks if resource exists
 		static bool contains(const res::Key<ResourceType> & key) {
-			const std::scoped_lock<std::mutex> lock(mutex());
-			return look_up_table().contains(key);
+			return find(key) != nullptr;
 		}
 
 		// Returns Resourec reference 
