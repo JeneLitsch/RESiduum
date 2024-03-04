@@ -2,6 +2,7 @@
 #include <string>
 #include <mutex>
 #include <set>
+#include <algorithm>
 
 namespace res {
 	struct ResourceChecker {
