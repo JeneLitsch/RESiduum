@@ -7,12 +7,8 @@
 #include "Key.hxx"
 
 namespace res {
-
-	template<typename ResT>
-	concept resource_type = std::same_as<decltype(ResT::id), res::Id<ResT>>;
-	
 	// Central interface for accessing shared and preloaded Resources
-	template<resource_type ResourceType>
+	template<typename ResourceType>
 	// Internal Storage for ResourceManager
 	class Storage {
 		// Only Resources are storable 
@@ -35,8 +31,13 @@ namespace res {
 		// Returns pointer to resource or nullptr if not found
 		static const ResourceType * find(const res::Key<ResourceType> & key) {
 			const std::scoped_lock<std::mutex> lock(mutex());
+			if(key.cached) {
+				return key.cached;
+			} 
 			if(look_up_table().contains(key.ptr())) {
-				return look_up_table().at(key.ptr()).get();
+				auto * obj = look_up_table().at(key.ptr()).get(); 
+				key.cached = obj;
+				return obj;
 			}
 			else return nullptr;
 		}

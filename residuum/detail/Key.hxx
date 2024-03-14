@@ -5,9 +5,15 @@
 #include "NameMap.hxx"
 
 namespace res {
-	template<typename ForResource>
+	template<typename R>
+	class Storage;
+	
+	template<typename Resource>
 	class Key {
 	public:
+		template<typename R>
+		friend class Storage;
+		
 		Key(const std::string & str) : str{ NameMap::resolve(str) } {
 			ResourceChecker::use(this->str);
 		}
@@ -38,17 +44,18 @@ namespace res {
 
 	private:
 		std::string_view str;
+		mutable const Resource * cached = nullptr;
 	};
 
 
 
-	template<typename ForResource>
-	auto operator<(const Key<ForResource> & l, const Key<ForResource> & r) {
+	template<typename Resource>
+	auto operator<(const Key<Resource> & l, const Key<Resource> & r) {
 		return std::less<const char *>{}(l.ptr(), r.ptr());
 	}
 
-	template<typename ForResource>
-	bool operator==(const Key<ForResource> & l, const Key<ForResource> & r) {
+	template<typename Resource>
+	bool operator==(const Key<Resource> & l, const Key<Resource> & r) {
 		return std::equal_to<const char *>{}(l.ptr(), r.ptr());
 	}
 }
