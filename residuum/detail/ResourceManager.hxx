@@ -56,6 +56,17 @@ namespace res {
 			look_up_table().insert({resource.id.ptr(), std::make_unique<ResourceType>(std::move(resource))});
 		}
 
+
+		static const std::vector<const ResourceType *> get_all() {
+			const std::scoped_lock<std::mutex> lock(mutex());
+			std::vector<const ResourceType *> resources;
+			for(auto & [id, res] : look_up_table()) {
+				resources.push_back(res.get());
+			} 
+			return resources;
+		}
+
+
 	private:
 		Storage() = delete;
 		Storage(const Storage &) = delete;
@@ -112,4 +123,9 @@ namespace res {
 		return Storage<ResourceType>::get(resourceId);
 	}
 
+
+	template<class ResourceType>
+	const std::vector<const ResourceType *> get_all() {
+		return Storage<ResourceType>::get_all();
+	}
 }
